@@ -10,6 +10,7 @@ import (
 
 	"github.com/yosakoo/CurrencyExchanger/internal/config"
 	"github.com/yosakoo/CurrencyExchanger/internal/currency"
+	"github.com/yosakoo/CurrencyExchanger/internal/rates"
 	"github.com/yosakoo/CurrencyExchanger/pkg/postgres"
 )
 
@@ -20,11 +21,19 @@ func main() {
 
 	conn, err := postgres.NewConnection(cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("Error connect to daabase: %v", err)
+		log.Fatalf("Error connect to database: %v", err)
 	}
 
-	storage := currency.NewStorage(conn)
-	mux := currency.NewRouter(storage)
+	currencyStorage := currency.NewStorage(conn)
+	currencyService := currency.NewService(currencyStorage)
+
+	exchangeRateStorage := rates.NewStorage(conn)
+	exchangeRateService := rates.NewService(exchangeRateStorage, currencyService)
+
+	mux := http.NewServeMux()
+
+	currency.NewRouter(mux, currencyService)
+	rates.NewRouter(mux, exchangeRateService)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

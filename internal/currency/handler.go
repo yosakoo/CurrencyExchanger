@@ -8,34 +8,36 @@ import (
 	"strings"
 )
 
+// интерфейс на косьюмере при надобности
 type handler struct {
-	storage *Storage
+	service *Service
 }
 
-func NewHandler(storage *Storage) *handler {
-	return &handler{storage: storage}
+func NewHandler(service *Service) *handler {
+	return &handler{service: service}
 }
 
 func (h *handler) GetByCode(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 
 	if len(code) != 3 {
-		http.Error(w, "Currency code must be exactly 3 characters", http.StatusBadRequest)
+		sendError(w, "Currency code must be exactly 3 characters", http.StatusBadRequest)
+
 		return
 	}
 
 	upperCode := strings.ToUpper(code)
 
-	currency, err := h.storage.GetCurrencyByCode(r.Context(), upperCode)
+	currency, err := h.service.GetCurrencyByCode(r.Context(), upperCode)
 	if err != nil {
 		if errors.Is(err, ErrCurrencyNotFound) {
-			http.Error(w, "Currency not found", http.StatusNotFound)
+			sendError(w, "Currency not found", http.StatusNotFound)
 
 			return
 		}
 
 		log.Printf("Error get currency: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		sendError(w, "Internal server error", http.StatusInternalServerError)
 
 		return
 	}
@@ -45,15 +47,16 @@ func (h *handler) GetByCode(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(currency); err != nil {
 		log.Printf("Error encoding currency: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+
 		return
 	}
 }
 
 func (h *handler) List(w http.ResponseWriter, r *http.Request) {
-	currencies, err := h.storage.List(r.Context())
+	currencies, err := h.service.List(r.Context())
 	if err != nil {
 		log.Printf("Error get currencies: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		sendError(w, "Internal server error", http.StatusInternalServerError)
 
 		return
 	}
@@ -71,28 +74,30 @@ func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	var currency Currency
 	if err := json.NewDecoder(r.Body).Decode(&currency); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		sendError(w, "Invalid JSON", http.StatusBadRequest)
+
 		return
 	}
 
 	if err := currency.Validate(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendError(w, err.Error(), http.StatusBadRequest)
+
 		return
 	}
 
 	currency.Code = strings.ToUpper(currency.Code)
 
-	err := h.storage.Create(r.Context(), &currency)
+	err := h.service.Create(r.Context(), currency)
 	if err != nil {
 		log.Printf("Error creating currency: %v", err)
 
 		if errors.Is(err, ErrCurrencyExists) {
-			http.Error(w, err.Error(), http.StatusConflict)
+			sendError(w, err.Error(), http.StatusConflict)
 
 			return
 		}
 
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		sendError(w, "Internal server error", http.StatusInternalServerError)
 
 		return
 	}
@@ -102,5 +107,25 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(currency); err != nil {
 		log.Printf("Error encoding currency: %v", err)
+	}
+}
+
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+func sendError(w http.ResponseWriter, message string, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+
+	response := ErrorResponse{Message: message}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("Error encoding error response: %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+
+		if _, writeErr := w.Write([]byte(`{"message":"Internal server error"}`)); writeErr != nil {
+			log.Printf("Error writing fallback error response: %v", writeErr)
+		}
 	}
 }

@@ -4,10 +4,10 @@ import "fmt"
 
 // по go стилю структуры данны в основном файле пакета
 type Currency struct {
-	Id       int
-	Code     string
-	FullName string
-	Sign     string
+	Id       int    `json:"id"`
+	Code     string `json:"code"`
+	FullName string `json:"name"`
+	Sign     string `json:"sign"`
 }
 
 // методы валидации на структурах, без отдельного валидатора

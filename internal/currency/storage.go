@@ -59,7 +59,7 @@ func (r *Storage) List(ctx context.Context) ([]Currency, error) {
 
 	defer func() {
 		if closeErr := rows.Close(); closeErr != nil {
-			log.Printf("Error close rows: %v", err)
+			log.Printf("Error close rows: %v", closeErr)
 		}
 	}()
 
@@ -105,41 +105,4 @@ func (r *Storage) Create(ctx context.Context, currency *Currency) error {
 	}
 
 	return nil
-}
-
-func (r *Storage) GetAllCurrencies(ctx context.Context) ([]Currency, error) {
-	rows, err := r.conn.QueryContext(ctx, "SELECT id, code, fullname, sign FROM currencies ORDER BY code")
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			log.Printf("Error close rows: %v", err)
-		}
-	}()
-
-	var currencies []Currency
-
-	for rows.Next() {
-		var currency Currency
-
-		err := rows.Scan(
-			&currency.Id,
-			&currency.Code,
-			&currency.FullName,
-			&currency.Sign,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		currencies = append(currencies, currency)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return currencies, nil
 }
