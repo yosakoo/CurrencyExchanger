@@ -10,7 +10,17 @@
   },
   "hooks": {
     "PreToolUse": [],
-    "PostToolUse": [],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "golangci-lint run --fix ./..."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

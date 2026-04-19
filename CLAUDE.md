@@ -9,7 +9,7 @@ REST API для управления валютами и обменными ку
 docker-compose up -d
 
 # Применить миграции
-make migrate-up
+goose -dir migrations postgres "host=localhost port=5432 dbname=currency_exchanger user=postgres password=postgres sslmode=disable" up
 
 # Запустить сервер
 go run ./cmd/...
