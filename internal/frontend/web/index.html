@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currency Exchanger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>Currency Exchanger</h1>
+    <nav>
+      <button class="tab-btn active" data-tab="currencies">Валюты</button>
+      <button class="tab-btn" data-tab="rates">Курсы</button>
+      <button class="tab-btn" data-tab="converter">Конвертер</button>
+      <button class="tab-btn" data-tab="add">Добавить</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-currencies" class="tab active">
+      <h2>Все валюты</h2>
+      <div id="currencies-list"><span class="loading">Загрузка...</span></div>
+    </section>
+
+    <section id="tab-rates" class="tab">
+      <h2>Обменные курсы</h2>
+      <div id="rates-list"><span class="loading">Загрузка...</span></div>
+    </section>
+
+    <section id="tab-converter" class="tab">
+      <h2>Конвертер валют</h2>
+      <form id="converter-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="conv-from">Из</label>
+            <input id="conv-from" type="text" placeholder="USD" maxlength="3" required>
+          </div>
+          <div class="form-group">
+            <label for="conv-to">В</label>
+            <input id="conv-to" type="text" placeholder="EUR" maxlength="3" required>
+          </div>
+          <div class="form-group">
+            <label for="conv-amount">Сумма</label>
+            <input id="conv-amount" type="number" placeholder="100" min="0.000001" step="any" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Конвертировать</button>
+      </form>
+      <div id="converter-result"></div>
+    </section>
+
+    <section id="tab-add" class="tab">
+      <div class="add-grid">
+        <div class="card">
+          <h2>Добавить валюту</h2>
+          <form id="add-currency-form">
+            <div class="form-group">
+              <label>Код (3 буквы)</label>
+              <input name="code" type="text" placeholder="USD" maxlength="3" required>
+            </div>
+            <div class="form-group">
+              <label>Название</label>
+              <input name="name" type="text" placeholder="US Dollar" required>
+            </div>
+            <div class="form-group">
+              <label>Символ</label>
+              <input name="sign" type="text" placeholder="$" maxlength="10" required>
+            </div>
+            <button type="submit" class="btn-primary">Добавить</button>
+            <p class="form-msg" id="currency-msg"></p>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Добавить / Обновить курс</h2>
+          <form id="rate-form">
+            <div class="form-group">
+              <label>Базовая валюта</label>
+              <input name="baseCurrencyCode" type="text" placeholder="USD" maxlength="3" required>
+            </div>
+            <div class="form-group">
+              <label>Целевая валюта</label>
+              <input name="targetCurrencyCode" type="text" placeholder="RUB" maxlength="3" required>
+            </div>
+            <div class="form-group">
+              <label>Курс</label>
+              <input name="rate" type="number" placeholder="89.5" min="0.000001" step="any" required>
+            </div>
+            <div class="btn-row">
+              <button type="submit" name="action" value="create" class="btn-primary">Добавить</button>
+              <button type="submit" name="action" value="update" class="btn-secondary">Обновить</button>
+            </div>
+            <p class="form-msg" id="rate-msg"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

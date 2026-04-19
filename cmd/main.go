@@ -10,6 +10,7 @@ import (
 
 	"github.com/yosakoo/CurrencyExchanger/internal/config"
 	"github.com/yosakoo/CurrencyExchanger/internal/currency"
+	"github.com/yosakoo/CurrencyExchanger/internal/frontend"
 	"github.com/yosakoo/CurrencyExchanger/internal/rates"
 	"github.com/yosakoo/CurrencyExchanger/pkg/postgres"
 )
@@ -34,6 +35,7 @@ func main() {
 
 	currency.NewRouter(mux, currencyService)
 	rates.NewRouter(mux, exchangeRateService)
+	frontend.NewRouter(mux)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
