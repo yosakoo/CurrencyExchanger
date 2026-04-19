@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp:*)",
+      "Skill(update-config)",
+      "Bash(gh api *)",
+      "Bash(gh repo *)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [],
+    "PostToolUse": [],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"[System.Media.SystemSounds]::Beep.Play(); Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Claude завершил задачу!', 'CurrencyExchanger', 'OK', 'Information')\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [],
+    "Notification": [],
+    "SubagentStop": []
+  },
+  "env": {}
+}
